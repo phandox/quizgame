@@ -2,6 +2,8 @@
 
 First exercise from Gophercises, learning the Golang with TDD.
 
+All the credits for this exercise goes to [Gophercises](https://github.com/gophercises/quiz). I am just contributing with my solution as learning exercise.
+
 # Instructions
 
 ## Exercise #1: Quiz Game
