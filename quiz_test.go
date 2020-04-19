@@ -10,6 +10,12 @@ type QuestionUsrAnswer struct {
 	ua string
 }
 
+func assertError(t *testing.T, got error) {
+	if got == nil {
+		t.Errorf("Expected error to occur")
+	}
+}
+
 func TestLoadQuestions(t *testing.T) {
 	t.Run("load with existing file path", func(t *testing.T) {
 		csvFilePath := "problems.csv"
@@ -35,6 +41,11 @@ func TestLoadQuestions(t *testing.T) {
 		if len(got) != len(want) {
 			t.Errorf("Number of elements in loaded %v - %d is not same as expected in %v - %d", got, len(got), want, len(want))
 		}
+	})
+	t.Run("try loading non-existent file", func(t *testing.T) {
+		invalidFile := ""
+		_, got := LoadQuestions(invalidFile)
+		assertError(t, got)
 	})
 }
 
