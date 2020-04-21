@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -20,11 +21,25 @@ type Score struct {
 	total   int
 }
 
+type UserArgs struct {
+	questionfile string
+}
+
 func (s *Score) Update(answer bool) {
 	if answer {
 		s.correct++
 	}
 	s.total++
+}
+func Flags(args []string) (UserArgs, error) {
+	ua := UserArgs{}
+	fs := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+	fs.StringVar(&ua.questionfile, "questions", "problems.csv", "Path to CSV file with questions")
+	err := fs.Parse(args)
+	if err != nil {
+		return UserArgs{}, err
+	}
+	return ua, nil
 }
 
 func LoadQuestions(filePath string) ([]Question, error) {
@@ -55,9 +70,13 @@ func AskQuestion(q Question, r io.Reader) bool {
 }
 
 func main() {
-	questions, err := LoadQuestions("problems.csv")
+	usrArgs, err := Flags(os.Args[1:])
 	if err != nil {
-		log.Fatal("Can't load the questions.")
+		log.Fatalf("Problem parsing user arguments: %v", err)
+	}
+	questions, err := LoadQuestions(usrArgs.questionfile)
+	if err != nil {
+		log.Fatalf("Can't load the questions. Error: %v", err)
 	}
 	var answer bool
 	score := Score{}

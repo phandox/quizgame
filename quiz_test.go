@@ -16,6 +16,12 @@ func assertError(t *testing.T, got error) {
 	}
 }
 
+func assertNoError(t *testing.T, got error) {
+	if got != nil {
+		t.Errorf("Error was not expected")
+	}
+}
+
 func TestLoadQuestions(t *testing.T) {
 	t.Run("load with existing file path", func(t *testing.T) {
 		csvFilePath := "problems.csv"
@@ -118,4 +124,36 @@ func TestAskQuestion(t *testing.T) {
 		}
 	})
 
+}
+
+func TestFlags(t *testing.T) {
+	usrArgsAssert := func(t *testing.T, got, want UserArgs) {
+		t.Helper()
+		if got != want {
+			t.Errorf("I got %v but %v was expected.", got, want)
+		}
+	}
+	t.Run("custom questions file", func(t *testing.T) {
+		usrArgs := []string{"-questions", "abc.csv"}
+		got, err := Flags(usrArgs)
+		want := UserArgs{questionfile: "abc.csv"}
+
+		assertNoError(t, err)
+		usrArgsAssert(t, got, want)
+	})
+	t.Run("default question file", func(t *testing.T) {
+		usrArgs := []string{}
+		got, err := Flags(usrArgs)
+		want := UserArgs{questionfile: "problems.csv"}
+
+		assertNoError(t, err)
+		usrArgsAssert(t, got, want)
+	})
+	t.Run("non-existing flag", func(t *testing.T) {
+		usrArgs := []string{"-invalid", "abc.csv"}
+		_, err := Flags(usrArgs)
+
+		assertError(t, err)
+
+	})
 }
