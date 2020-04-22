@@ -56,34 +56,33 @@ func TestLoadQuestions(t *testing.T) {
 }
 
 func TestUpdateScore(t *testing.T) {
-	t.Run("correct answer", func(t *testing.T) {
-		score := Score{}
-		score.Update(true)
-		want := Score{correct: 1, total: 1}
+	tt := []struct {
+		name    string
+		want    Score
+		answers []bool
+	}{
+		{"correct answer score counting", Score{1, 1}, []bool{true}},
+		{"incorrect answer score counting", Score{0, 1}, []bool{false}},
+		{"correct and incorrect answer score counting", Score{1, 2}, []bool{false, true}},
+	}
 
-		if score != want {
-			t.Errorf("Expected score to be %v but got %v", want, score)
+	updateScore := func(t *testing.T, s *Score, answers []bool) {
+		t.Helper()
+		for _, answer := range answers {
+			s.Update(answer)
 		}
-	})
-	t.Run("incorrect answer", func(t *testing.T) {
-		score := Score{}
-		score.Update(false)
-		want := Score{correct: 0, total: 1}
+	}
 
-		if score != want {
-			t.Errorf("Expected score to be %v but got %v", want, score)
-		}
-	})
-	t.Run("correct and incorrect - multi question", func(t *testing.T) {
-		score := Score{}
-		score.Update(false)
-		score.Update(true)
-		want := Score{correct: 1, total: 2}
-
-		if score != want {
-			t.Errorf("Expected score to be %v but got %v", want, score)
-		}
-	})
+	for _, test := range tt {
+		t.Run(test.name, func(t *testing.T) {
+			score := Score{}
+			updateScore(t, &score, test.answers)
+			want := test.want
+			if score != want {
+				t.Errorf("Expected score to be %v but got %v", want, score)
+			}
+		})
+	}
 }
 
 func TestAskQuestion(t *testing.T) {
