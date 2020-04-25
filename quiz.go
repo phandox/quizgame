@@ -34,7 +34,7 @@ func (s *Score) Update(answer bool) {
 func Flags(args []string) (UserArgs, error) {
 	ua := UserArgs{}
 	fs := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
-	fs.StringVar(&ua.questionfile, "questions", "problems.csv", "Path to CSV file with questions")
+	fs.StringVar(&ua.questionfile, "questions", "problems.csv", "Path to CSV file with questions in format of 'question,answer'")
 	err := fs.Parse(args)
 	if err != nil {
 		return UserArgs{}, err
