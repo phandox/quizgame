@@ -43,7 +43,7 @@ func Flags(args []string) (UserArgs, error) {
 }
 
 func LoadQuestions(filePath string) ([]Question, error) {
-	var questions []Question
+	questions := []Question{}
 	f, err := os.Open(filePath)
 	if err != nil {
 		return []Question{}, err
@@ -51,9 +51,12 @@ func LoadQuestions(filePath string) ([]Question, error) {
 	defer f.Close()
 
 	r := csv.NewReader(f)
+	// Allow only format 'question,answer'
+	r.FieldsPerRecord = 2
+
 	records, err := r.ReadAll()
 	if err != nil {
-		log.Fatal(err)
+		return []Question{}, err
 	}
 	for _, record := range records {
 		questions = append(questions, Question{record[0], record[1]})

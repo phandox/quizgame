@@ -1,11 +1,12 @@
 package main
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
 
-type QuestionUsrAnswer struct {
+type questionUsrAnswer struct {
 	q  Question
 	ua string
 }
@@ -23,6 +24,49 @@ func assertNoError(t *testing.T, got error) {
 }
 
 func TestLoadQuestions(t *testing.T) {
+	tt := []struct {
+		name     string
+		filename string
+		pass     bool
+		content  []Question
+	}{
+		{"valid question file", "testdata/valid_questions.csv", true, []Question{
+			{"5+5", "10"},
+			{"1+1", "2"},
+			{"8+3", "11"},
+		}},
+		{"too many columns", "testdata/many_columns.csv", false, nil},
+		{"spaces in questions", "testdata/questions_spaces.csv", true, []Question{
+			{"5 + 5", "10"},
+			{"  1  +    1", "2"},
+		}},
+		{"empty file", "testdata/empty.csv", true, []Question{}},
+		{"comma in questions", "testdata/questions_comma.csv", true, []Question{
+			{"Answer to 5+5, sir?", "10"},
+			{"Write ',' ", ","},
+		}},
+		{"I/O error (nonexistent)", "testdata/notexists.csv", false, nil},
+	}
+	for _, test := range tt {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := LoadQuestions(test.filename)
+			if !test.pass {
+				assertError(t, err)
+			} else {
+				if err != nil {
+					t.Errorf("Error occured but was not expected: %v", err)
+				}
+
+				if len(got) != len(test.content) {
+					t.Errorf("Number of elements %d loaded ,expected %d elements", len(got), len(test.content))
+				}
+
+				if !reflect.DeepEqual(got, test.content) {
+					t.Errorf("Got %v ; expected %v", got, test.content)
+				}
+			}
+		})
+	}
 	t.Run("load with existing file path", func(t *testing.T) {
 		csvFilePath := "problems.csv"
 		// this is from problems.csv and needs to be refactored.
@@ -107,7 +151,7 @@ func TestAskQuestion(t *testing.T) {
 		}
 	})
 	t.Run("count score all correct", func(t *testing.T) {
-		tc := []QuestionUsrAnswer{
+		tc := []questionUsrAnswer{
 			{Question{"1+1", "2"}, "2\n"},
 			{Question{"2+2", "4"}, "4\n"},
 		}
